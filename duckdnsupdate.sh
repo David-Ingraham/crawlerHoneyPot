@@ -1,0 +1,1 @@
+curl -s "https://www.duckdns.org/update?domains=classified-mil&token=629fa2bc-5efb-4dba-a151-27760c406165&ip=" > /dev/null
