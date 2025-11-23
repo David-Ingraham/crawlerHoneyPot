@@ -1,0 +1,260 @@
+Phase 1 — Hosting + Setup (Day 1)
+
+Get a cheap VPS or a shared host (DigitalOcean, Vultr, Linode, whatever).
+
+Install:
+
+Nginx or Apache
+
+Fail2Ban (optional)
+
+A logging stack (see below)
+
+Deploy a static site:
+
+Plain HTML
+
+No real content
+
+NO references to yourself or any real PII
+
+Goal: minimal human visibility, maximum bot visibility.
+
+Phase 2 — Build the Bot-Attraction Layer (Day 1–2)
+
+This is what pulls in bots. Tools, signatures, and files that are bot magnets.
+
+1. Add fake CMS fingerprints
+
+You don’t actually install WordPress — you just add files and metadata bots look for:
+
+<meta name="generator" content="WordPress 6.3">
+
+
+Create empty paths:
+
+/wp-admin/
+
+/wp-content/
+
+/wp-includes/
+
+/xmlrpc.php
+
+Bots hammer these non-stop.
+
+2. Add crawler bait paths
+
+Static files only. Examples:
+
+/admin
+
+/login
+
+/api/test
+
+/feed.xml
+
+/sitemap.xml (auto-generated with lots of fake URLs)
+
+/robots.txt that allows everything
+
+This guarantees scrapers show up.
+3. Add a “large sitemap”
+
+A static sitemap.xml with ~500–1000 fake pages:
+
+/products/item1234
+/users/verify?u=abc
+/profile/1234
+
+
+These pages don’t need to exist.
+
+4. Add invisible keyword triggers
+
+Hidden divs or footer text containing tokens like:
+
+“email:”
+
+“contact:”
+
+“password=”
+
+“api key”
+
+“login”
+
+“user:”
+
+
+5. Add outbound links 
+
+Bots follow links blindly.
+Link to several:
+
+random blogs
+
+expired domains
+
+RSS feeds
+
+long-tail forums
+
+This causes bots crawling those to also crawl you.
+
+
+
+You’re building a bot observation station.
+Not identity manipulation, not evasion — just safe analysis.
+
+Monitoring must live on your server
+
+Correct — you want:
+
+low latency
+
+full request logging
+
+access to raw headers
+
+no third-party analytics
+
+Here’s a simple, safe architecture:
+
+Blueprint: “Bot Monitor Stack”
+Core Components
+
+Nginx or Apache access logs
+Capture raw:
+
+IP
+
+user-agent
+
+request path
+
+referrer
+
+timestamps
+
+A log parser + tagger
+A small Python or Go script that:
+
+tails the log
+
+detects bot user-agents
+
+fingerprints common bot categories
+
+stores results in SQLite / JSON / Elasticsearch
+
+Dashboards or alerts
+Use:
+
+Grafana (pretty dashboard)
+
+Kibana (if using Elastic)
+
+Or just tail scripts in terminal
+
+Completely safe.
+
+Categories your tool should detect
+1. Search engine bots
+
+Googlebot
+
+Bingbot
+
+DuckDuckGo
+
+Yandex
+
+2. SEO crawlers
+
+AhrefsBot
+
+SemrushBot
+
+MJ12bot
+
+Moz
+
+ScreamingFrog
+
+3. Security scanners
+
+Nikto
+
+Wapiti
+
+sqlmap
+
+Nessus
+
+OpenVAS
+
+ZAP
+
+4. Generic scrapers
+
+python-requests
+
+curl
+
+Go-http-client
+
+Node fetch bots
+
+Empty or spoofed UAs
+
+Your tool can tag these based on:
+
+UA patterns
+
+request behavior
+
+frequency
+
+path targeting (e.g., probing /wp-admin/)
+
+High-level Monitoring Workflow
+1. Nginx logs everything
+/var/log/nginx/access.log
+
+2. Python/Go watcher script parses new entries
+
+categorize user-agents
+
+detect suspicious patterns
+
+log events in your DB
+
+3. Dashboard or CLI outputs trends
+
+bots per hour
+
+top paths hit
+
+scanner activity
+
+unclassified bots
+
+crawl depth
+
+ Metrics to Measure
+
+Purely benign:
+
+bot visit frequency
+
+which bait paths are most popular
+
+which bot types hit you most
+
+referrer analysis
+
+how fast bots appear after deployment
+
+which sites seem to trigger scraper visits

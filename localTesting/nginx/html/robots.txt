@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Sitemap: /sitemap.xml
+
+# Bait paths
+Allow: /admin
+Allow: /wp-admin
+Allow: /api
+

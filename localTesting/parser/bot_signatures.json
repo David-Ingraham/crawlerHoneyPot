@@ -1,0 +1,38 @@
+{
+  "search_engine": [
+    "Googlebot",
+    "Bingbot",
+    "DuckDuckBot",
+    "YandexBot",
+    "Baiduspider"
+  ],
+  "seo_crawler": [
+    "AhrefsBot",
+    "SemrushBot",
+    "MJ12bot",
+    "Moz",
+    "DotBot",
+    "ScreamingFrog"
+  ],
+  "security_scanner": [
+    "Nikto",
+    "Wapiti",
+    "sqlmap",
+    "Nessus",
+    "OpenVAS",
+    "ZAP",
+    "w3af",
+    "Nmap"
+  ],
+  "generic_scraper": [
+    "python-requests",
+    "curl",
+    "Go-http-client",
+    "node-fetch",
+    "axios",
+    "urllib",
+    "Java/",
+    "Ruby"
+  ]
+}
+
