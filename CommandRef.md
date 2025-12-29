@@ -225,3 +225,9 @@ echo url="https://www.duckdns.org/update?domains=YOURDOMAIN&token=YOUR_TOKEN&ip=
 # Setup cron for auto-update
 crontab -e
 # Add: */5 * * * * ~/duckdns.sh >/dev/null 2>&1
+
+
+ grep CRON /var/log/syslog | tail -20
+
+
+ 
