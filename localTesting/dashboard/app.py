@@ -10,8 +10,18 @@ from datetime import datetime, timedelta
 from collections import Counter
 import os
 from classifier import classify_traffic, classify_entries
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
+
+# Configure rate limiting
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per hour"],
+    storage_uri="memory://"
+)
 
 # Database path
 DB_PATH = os.getenv('DB_PATH', '/data/bot_data.db')
@@ -37,6 +47,7 @@ def about():
     return render_template('about.html')
 
 @app.route('/api/stats')
+@limiter.limit("30 per minute")
 def get_stats():
     """Get overall statistics with on-the-fly classification"""
     conn = get_db()
@@ -96,6 +107,7 @@ def get_stats():
     })
 
 @app.route('/api/threat-distribution')
+@limiter.limit("30 per minute")
 def get_threat_distribution():
     """Get traffic distribution by threat level with percentages"""
     conn = get_db()
@@ -133,6 +145,7 @@ def get_threat_distribution():
     return jsonify(results)
 
 @app.route('/api/top-ips')
+@limiter.limit("30 per minute")
 def get_top_ips():
     """Get top requesting IPs"""
     conn = get_db()
@@ -152,6 +165,7 @@ def get_top_ips():
     return jsonify(ips)
 
 @app.route('/api/top-paths')
+@limiter.limit("30 per minute")
 def get_top_paths():
     """Get most targeted paths"""
     conn = get_db()
@@ -171,6 +185,7 @@ def get_top_paths():
     return jsonify(paths)
 
 @app.route('/api/timeline')
+@limiter.limit("30 per minute")
 def get_timeline():
     """Get requests over time"""
     conn = get_db()
@@ -193,6 +208,7 @@ def get_timeline():
     return jsonify(timeline)
 
 @app.route('/api/recent')
+@limiter.limit("30 per minute")
 def get_recent():
     """Get most recent requests with on-the-fly classification"""
     conn = get_db()
@@ -226,6 +242,7 @@ def get_recent():
     return jsonify(recent)
 
 @app.route('/api/attack-types')
+@limiter.limit("30 per minute")
 def get_attack_types():
     """Classify patterns by type based on paths"""
     conn = get_db()
@@ -260,6 +277,7 @@ def get_attack_types():
     return jsonify(results)
 
 @app.route('/api/malicious-activity')
+@limiter.limit("30 per minute")
 def get_malicious_activity():
     """Get details on malicious traffic only"""
     conn = get_db()
