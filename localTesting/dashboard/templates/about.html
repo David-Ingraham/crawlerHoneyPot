@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Honeypot Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <h1>Honeypot Threat Dashboard</h1>
+            <div class="nav-links">
+                <a href="/">Dashboard</a>
+                <a href="/about" class="active">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="about-content">
+            <h1>About This Project</h1>
+            
+            <section>
+                <h2>What is a Honeypot?</h2>
+                <p>
+                    A honeypot is a security mechanism that sets up a vulnerable-looking system to attract and monitor 
+                    malicious activity. Think of it as a digital decoy - it appears to be a real web server with 
+                    exploitable vulnerabilities, but it's actually just collecting data on attack patterns.
+                </p>
+            </section>
+
+            <section>
+                <h2>How This Works</h2>
+                <p>This honeypot consists of:</p>
+                <ul>
+                    <li><strong>Nginx Web Server:</strong> Serves fake WordPress, admin panels, and configuration files</li>
+                    <li><strong>Real-time Logging:</strong> Every HTTP request is logged with detailed metadata</li>
+                    <li><strong>Bot Classification:</strong> Python parser categorizes attackers (search engines, security scanners, malware bots)</li>
+                    <li><strong>SQLite Database:</strong> All data is stored for analysis and visualization</li>
+                    <li><strong>Live Dashboard:</strong> This dashboard queries the database every 30 seconds for real-time updates</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>What We're Attracting</h2>
+                <p>Common attack patterns observed:</p>
+                <ul>
+                    <li><strong>Vulnerability Scanners:</strong> Automated tools looking for PHPUnit RCE, WordPress exploits, etc.</li>
+                    <li><strong>Credential Harvesters:</strong> Bots searching for .env files, .git directories, and config files</li>
+                    <li><strong>Botnet Recruitment:</strong> Malware trying to install backdoors (Mozi, Mirai botnets)</li>
+                    <li><strong>Web Shell Hunters:</strong> Looking for already-compromised sites</li>
+                    <li><strong>SEO Crawlers:</strong> Legitimate but aggressive website indexers</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Technology Stack</h2>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <h3>Infrastructure</h3>
+                        <ul>
+                            <li>Linode VPS</li>
+                            <li>Docker & Docker Compose</li>
+                            <li>Ubuntu Linux</li>
+                        </ul>
+                    </div>
+                    <div class="tech-item">
+                        <h3>Backend</h3>
+                        <ul>
+                            <li>Nginx (Web Server)</li>
+                            <li>Python 3.11</li>
+                            <li>Flask (Dashboard)</li>
+                            <li>SQLite (Database)</li>
+                        </ul>
+                    </div>
+                    <div class="tech-item">
+                        <h3>Frontend</h3>
+                        <ul>
+                            <li>HTML5 / CSS3</li>
+                            <li>JavaScript</li>
+                            <li>Chart.js</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Key Findings</h2>
+                <p>After collecting data for several months, interesting patterns have emerged:</p>
+                <ul>
+                    <li>Most attacks come from automated scanners, not human hackers</li>
+                    <li>The same vulnerabilities (PHPUnit, WordPress) are tested thousands of times</li>
+                    <li>Attackers scan for .env files constantly, hoping to find API keys and credentials</li>
+                    <li>Some IPs attack repeatedly over days/weeks with identical patterns</li>
+                    <li>Legitimate security research companies (Censys, Shodan, Palo Alto) also scan regularly</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Security & Ethics</h2>
+                <p>
+                    This honeypot is completely passive - it only logs requests and returns fake responses. 
+                    No actual vulnerabilities exist, and it cannot be used to attack other systems. 
+                    All data is used for educational purposes and security research.
+                </p>
+                <p>
+                    The honeypot serves no sensitive data and poses no risk to visitors. If you're seeing your 
+                    IP in the logs, it means your system (or a bot on your network) is scanning for vulnerabilities.
+                </p>
+            </section>
+
+            <section>
+                <h2>Source Code</h2>
+                <p>
+                    This project is open source and available on GitHub. Check out the code to learn how 
+                    to build your own honeypot or improve this one.
+                </p>
+                <p>
+                    <a href="https://github.com/yourusername/honeypot-project" class="btn-link" target="_blank">
+                        View on GitHub
+                    </a>
+                </p>
+            </section>
+
+            <section>
+                <h2>Contact</h2>
+                <p>
+                    Questions about this project? Want to discuss security research?
+                </p>
+                <p>
+                    Connect with me on <a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+                </p>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <p>Data collected from internet honeypot | 
+        <a href="/">Back to Dashboard</a></p>
+    </footer>
+</body>
+</html>
+
+

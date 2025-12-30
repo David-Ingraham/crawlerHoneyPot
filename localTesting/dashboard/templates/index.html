@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honeypot Threat Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <h1>Honeypot Threat Dashboard</h1>
+            <div class="nav-links">
+                <a href="/" class="active">Dashboard</a>
+                <a href="/about">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-requests">--</div>
+                <div class="stat-label">Total Attacks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="unique-ips">--</div>
+                <div class="stat-label">Unique IPs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="today-count">--</div>
+                <div class="stat-label">Attacks Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    <span class="status-indicator"></span> Live
+                </div>
+                <div class="stat-label">Status</div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h2>Attack Categories</h2>
+                <canvas id="categoriesChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h2>Attack Types by Path</h2>
+                <canvas id="attackTypesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h2>Top 10 Attacking IPs</h2>
+                <canvas id="topIpsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h2>Most Targeted Paths</h2>
+                <canvas id="topPathsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Timeline Chart (Full Width) -->
+        <div class="chart-card full-width">
+            <h2>Attack Timeline (Last 7 Days)</h2>
+            <canvas id="timelineChart"></canvas>
+        </div>
+
+        <!-- Recent Attacks Table -->
+        <div class="table-card">
+            <h2>Recent Attacks</h2>
+            <div class="table-container">
+                <table id="recent-attacks">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>IP Address</th>
+                            <th>Target Path</th>
+                            <th>User Agent</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5" class="loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Data collected from internet honeypot | Updates every 30 seconds | 
+        <a href="/about">Learn more about this project</a></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,9 @@
+added verfication file for google
+
+tried to post my url on reddit wallstreetbets but it was rejected, still got two differetn reddit bots
+
+cron job running on the linode to update duck dns with ip via MY_IP=$(curl -4 -s ifconfig.me)
+
+*/5 * * * * ~/duckdns.sh
+
+

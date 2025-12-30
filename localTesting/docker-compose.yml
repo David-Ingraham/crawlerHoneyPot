@@ -24,6 +24,21 @@ services:
     networks:
       - honeypot
 
+  # Dashboard web interface
+  dashboard:
+    build: ./dashboard
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data:ro
+    environment:
+      - DB_PATH=/data/bot_data.db
+      - PORT=8080
+    depends_on:
+      - parser
+    networks:
+      - honeypot
+
 networks:
   honeypot:
     driver: bridge
