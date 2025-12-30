@@ -23,7 +23,7 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value" id="total-requests">--</div>
-                <div class="stat-label">Total Attacks</div>
+                <div class="stat-label">Total Requests</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="unique-ips">--</div>
@@ -31,7 +31,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="today-count">--</div>
-                <div class="stat-label">Attacks Today</div>
+                <div class="stat-label">Last 24 Hours</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">
@@ -41,14 +41,36 @@
             </div>
         </div>
 
+        <!-- Threat Level Cards -->
+        <div class="threat-grid">
+            <div class="threat-card benign">
+                <div class="threat-icon">🟢</div>
+                <div class="threat-value" id="benign-count">--</div>
+                <div class="threat-percent" id="benign-percent">--%</div>
+                <div class="threat-label">Benign Traffic</div>
+            </div>
+            <div class="threat-card reconnaissance">
+                <div class="threat-icon">🟡</div>
+                <div class="threat-value" id="reconnaissance-count">--</div>
+                <div class="threat-percent" id="reconnaissance-percent">--%</div>
+                <div class="threat-label">Reconnaissance</div>
+            </div>
+            <div class="threat-card malicious">
+                <div class="threat-icon">🔴</div>
+                <div class="threat-value" id="malicious-count">--</div>
+                <div class="threat-percent" id="malicious-percent">--%</div>
+                <div class="threat-label">Malicious</div>
+            </div>
+        </div>
+
         <!-- Charts Row 1 -->
         <div class="chart-grid">
             <div class="chart-card">
-                <h2>Attack Categories</h2>
+                <h2>Traffic Categories</h2>
                 <canvas id="categoriesChart"></canvas>
             </div>
             <div class="chart-card">
-                <h2>Attack Types by Path</h2>
+                <h2>Reconnaissance Patterns</h2>
                 <canvas id="attackTypesChart"></canvas>
             </div>
         </div>

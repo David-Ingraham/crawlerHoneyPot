@@ -36,21 +36,39 @@
                 <ul>
                     <li><strong>Nginx Web Server:</strong> Serves fake WordPress, admin panels, and configuration files</li>
                     <li><strong>Real-time Logging:</strong> Every HTTP request is logged with detailed metadata</li>
-                    <li><strong>Bot Classification:</strong> Python parser categorizes attackers (search engines, security scanners, malware bots)</li>
-                    <li><strong>SQLite Database:</strong> All data is stored for analysis and visualization</li>
+                    <li><strong>Multi-Factor Classification:</strong> Python parser analyzes user-agent strings AND requested paths to calculate threat scores</li>
+                    <li><strong>Threat Scoring:</strong> Each request receives a score based on multiple factors (negative = benign, positive = suspicious/malicious)</li>
+                    <li><strong>SQLite Database:</strong> All data stored with threat level, score, and category</li>
                     <li><strong>Live Dashboard:</strong> This dashboard queries the database every 30 seconds for real-time updates</li>
                 </ul>
             </section>
 
             <section>
-                <h2>What We're Attracting</h2>
-                <p>Common attack patterns observed:</p>
+                <h2>Traffic Classification</h2>
+                <p>The system categorizes all traffic into three threat levels using multi-factor analysis:</p>
+                
+                <h3>🟢 Benign Traffic (~25-30%)</h3>
                 <ul>
-                    <li><strong>Vulnerability Scanners:</strong> Automated tools looking for PHPUnit RCE, WordPress exploits, etc.</li>
-                    <li><strong>Credential Harvesters:</strong> Bots searching for .env files, .git directories, and config files</li>
-                    <li><strong>Botnet Recruitment:</strong> Malware trying to install backdoors (Mozi, Mirai botnets)</li>
-                    <li><strong>Web Shell Hunters:</strong> Looking for already-compromised sites</li>
-                    <li><strong>SEO Crawlers:</strong> Legitimate but aggressive website indexers</li>
+                    <li><strong>Search Engines:</strong> Google, Bing, DuckDuckGo indexing the site</li>
+                    <li><strong>Security Research:</strong> Censys, Shodan, academic scanning projects</li>
+                    <li><strong>SEO Tools:</strong> Ahrefs, Semrush, legitimate analytics</li>
+                    <li><strong>Social Media Bots:</strong> Twitter, Reddit generating link previews</li>
+                </ul>
+                
+                <h3>🟡 Reconnaissance (~60-65%)</h3>
+                <ul>
+                    <li><strong>Vulnerability Scanning:</strong> Looking for PHPUnit RCE, WordPress exploits</li>
+                    <li><strong>Credential Harvesting:</strong> Searching for .env files, .git directories</li>
+                    <li><strong>Directory Enumeration:</strong> Mapping site structure and common paths</li>
+                    <li><strong>Technology Fingerprinting:</strong> Identifying software versions</li>
+                </ul>
+                
+                <h3>🔴 Malicious (~10-15%)</h3>
+                <ul>
+                    <li><strong>Remote Code Execution:</strong> Shell injection, command execution attempts</li>
+                    <li><strong>Botnet Recruitment:</strong> Mirai, Mozi malware installation attempts</li>
+                    <li><strong>Exploit Payloads:</strong> Known CVE exploitation (Log4Shell, etc.)</li>
+                    <li><strong>Web Shell Access:</strong> Looking for already-compromised sites</li>
                 </ul>
             </section>
 
@@ -86,14 +104,27 @@
             </section>
 
             <section>
+                <h2>Classification Methodology</h2>
+                <p>The system uses multi-factor threat assessment:</p>
+                <ul>
+                    <li><strong>User-Agent Analysis:</strong> Identifies known bots (Google, security scanners, generic HTTP clients)</li>
+                    <li><strong>Path Pattern Matching:</strong> Regex patterns detect vulnerability scans, exploit attempts, credential harvesting</li>
+                    <li><strong>Threat Scoring:</strong> Combines both factors into numerical score (range: -10 to 50+)</li>
+                    <li><strong>Threshold Classification:</strong> Score < 0 = Benign, 0-19 = Reconnaissance, 20+ = Malicious</li>
+                </ul>
+                <p><strong>Example:</strong> Googlebot requesting /robots.txt = -10 (Benign). Unknown client requesting /shell?wget+malware = 50+ (Malicious).</p>
+            </section>
+
+            <section>
                 <h2>Key Findings</h2>
                 <p>After collecting data for several months, interesting patterns have emerged:</p>
                 <ul>
-                    <li>Most attacks come from automated scanners, not human hackers</li>
-                    <li>The same vulnerabilities (PHPUnit, WordPress) are tested thousands of times</li>
-                    <li>Attackers scan for .env files constantly, hoping to find API keys and credentials</li>
-                    <li>Some IPs attack repeatedly over days/weeks with identical patterns</li>
-                    <li>Legitimate security research companies (Censys, Shodan, Palo Alto) also scan regularly</li>
+                    <li><strong>Not all traffic is malicious:</strong> ~25-30% is legitimate bots doing their job</li>
+                    <li><strong>Reconnaissance dominates:</strong> ~60% of traffic is scanning for vulnerabilities but not actively exploiting</li>
+                    <li><strong>Active exploitation is rare:</strong> Only ~10-15% of traffic attempts actual exploitation</li>
+                    <li><strong>Automated scanners rule:</strong> The same vulnerabilities (PHPUnit, WordPress) tested thousands of times by bots</li>
+                    <li><strong>Persistent attackers:</strong> Some IPs return repeatedly over days/weeks with identical patterns</li>
+                    <li><strong>Security researchers are noisy:</strong> Legitimate companies (Censys, Shodan, Palo Alto) generate significant traffic</li>
                 </ul>
             </section>
 

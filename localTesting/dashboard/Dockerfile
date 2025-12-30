@@ -8,6 +8,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY app.py .
+COPY classifier.py .
+COPY bot_signatures.json .
 COPY templates/ templates/
 COPY static/ static/
 

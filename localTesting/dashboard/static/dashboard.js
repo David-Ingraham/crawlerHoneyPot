@@ -185,6 +185,7 @@ async function loadAllData() {
     try {
         await Promise.all([
             loadStats(),
+            loadThreatDistribution(),
             loadTopIps(),
             loadTopPaths(),
             loadTimeline(),
@@ -205,11 +206,33 @@ async function loadStats() {
     document.getElementById('unique-ips').textContent = formatNumber(data.unique_ips);
     document.getElementById('today-count').textContent = formatNumber(data.today);
     
-    // Update categories chart
-    updateChart(categoriesChart, 
-        data.categories.map(c => c.name),
-        data.categories.map(c => c.count)
-    );
+    // Update categories chart (top 10 categories)
+    if (data.categories && data.categories.length > 0) {
+        updateChart(categoriesChart, 
+            data.categories.map(c => c.name),
+            data.categories.map(c => c.count)
+        );
+    }
+}
+
+// Load threat distribution
+async function loadThreatDistribution() {
+    const response = await fetch('/api/threat-distribution');
+    const data = await response.json();
+    
+    // Update threat level cards
+    data.forEach(item => {
+        const level = item.threat_level;
+        const countElem = document.getElementById(`${level}-count`);
+        const percentElem = document.getElementById(`${level}-percent`);
+        
+        if (countElem) {
+            countElem.textContent = formatNumber(item.count);
+        }
+        if (percentElem) {
+            percentElem.textContent = `${item.percentage}%`;
+        }
+    });
 }
 
 // Load top IPs

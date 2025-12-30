@@ -123,6 +123,75 @@ nav h1 {
     50% { opacity: 0.5; }
 }
 
+/* Threat Level Cards */
+.threat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.threat-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.threat-card.benign {
+    border-color: var(--success-color);
+}
+
+.threat-card.reconnaissance {
+    border-color: var(--warning-color);
+}
+
+.threat-card.malicious {
+    border-color: var(--danger-color);
+}
+
+.threat-card:hover {
+    transform: translateY(-2px);
+}
+
+.threat-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.threat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.threat-card.benign .threat-value {
+    color: var(--success-color);
+}
+
+.threat-card.reconnaissance .threat-value {
+    color: var(--warning-color);
+}
+
+.threat-card.malicious .threat-value {
+    color: var(--danger-color);
+}
+
+.threat-percent {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.threat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 /* Charts Grid */
 .chart-grid {
     display: grid;

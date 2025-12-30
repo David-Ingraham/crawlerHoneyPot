@@ -1,30 +1,21 @@
 #!/usr/bin/env python3
 """
 Bot Traffic Parser
-Tails nginx logs and classifies bot traffic
+Tails nginx logs and stores raw traffic data
 """
 
 import re
-import json
 import time
 import sqlite3
-from datetime import datetime
 from pathlib import Path
 
 # Configuration
 LOG_FILE = "/logs/access.log"
 DB_FILE = "/data/bot_data.db"
-SIGNATURES_FILE = "bot_signatures.json"
-
-# Load bot signatures from JSON
-def load_signatures():
-    """Load bot user-agent patterns from JSON file"""
-    with open(SIGNATURES_FILE, 'r') as f:
-        return json.load(f)
 
 # Initialize SQLite database
 def init_db():
-    """Create SQLite table for bot traffic data"""
+    """Create SQLite table for traffic data"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('''
@@ -35,29 +26,15 @@ def init_db():
             user_agent TEXT,
             path TEXT,
             status INTEGER,
-            category TEXT,
             referer TEXT
         )
     ''')
     conn.commit()
     return conn
 
-# Classify bot based on user-agent
-def classify_bot(user_agent, signatures):
-    """Match user-agent against known bot patterns"""
-    user_agent_lower = user_agent.lower()
-    
-    for category, patterns in signatures.items():
-        for pattern in patterns:
-            if pattern.lower() in user_agent_lower:
-                return category
-    
-    return "unknown"
-
 # Parse nginx log line
 def parse_log_line(line):
     """Extract fields from nginx log entry"""
-    # Pattern matches nginx detailed log format
     pattern = r'(\S+) - \[(.*?)\] "(.*?)" (\d+) (\d+) "(.*?)" "(.*?)"'
     match = re.match(pattern, line)
     
@@ -79,8 +56,8 @@ def extract_path(request):
     return parts[1] if len(parts) > 1 else "/"
 
 # Tail log file and process entries
-def tail_logs(conn, signatures):
-    """Follow log file and process new entries in real-time"""
+def tail_logs(conn):
+    """Follow log file and store entries"""
     cursor = conn.cursor()
     
     # Wait for log file to exist
@@ -99,49 +76,41 @@ def tail_logs(conn, signatures):
                 time.sleep(0.1)
                 continue
             
-            # Parse and classify
+            # Parse and store
             entry = parse_log_line(line)
             if entry:
                 path = extract_path(entry['request'])
-                category = classify_bot(entry['user_agent'], signatures)
                 
-                # Store in database
+                # Store raw data only
                 cursor.execute('''
-                    INSERT INTO bot_traffic (timestamp, ip, user_agent, path, status, category, referer)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO bot_traffic (timestamp, ip, user_agent, path, status, referer)
+                    VALUES (?, ?, ?, ?, ?, ?)
                 ''', (
                     entry['timestamp'],
                     entry['ip'],
                     entry['user_agent'],
                     path,
                     entry['status'],
-                    category,
                     entry['referer']
                 ))
                 conn.commit()
-                
-                # Minimal output - only show bot category and path
-                if category != "unknown":
-                    print(f"[{category}] {path} - {entry['ip']}")
 
 # Main execution
 def main():
-    """Initialize components and start monitoring"""
-    print("Bot Traffic Monitor Starting...")
-    print("Monitoring localhost:8080\n")
+    """Initialize and start monitoring"""
+    print("Bot Traffic Parser Starting...")
     
-    # Initialize database and load signatures
+    # Initialize database
     conn = init_db()
-    signatures = load_signatures()
+    print("Database initialized")
     
     # Start monitoring logs
     try:
-        tail_logs(conn, signatures)
+        tail_logs(conn)
     except KeyboardInterrupt:
-        print("\nShutting down...")
+        print("Shutting down...")
     finally:
         conn.close()
 
 if __name__ == "__main__":
     main()
-
