@@ -269,7 +269,7 @@ def get_attack_types():
         """, (pattern,))
         count = cursor.fetchone()['count']
         if count > 0:
-            results.append({'type': name, 'count': count})
+            results.append({'type': name, 'count': count, 'pattern': pattern})
     
     conn.close()
     
@@ -369,6 +369,213 @@ def get_requests_by_threat(threat_level):
             # Limit to 50 total results
             if len(filtered_results) >= MAX_TOTAL:
                 break
+    
+    return jsonify(filtered_results)
+
+@app.route('/api/requests-by-category/<category>')
+@limiter.limit("30 per minute")
+def get_requests_by_category(category):
+    """Get recent requests filtered by specific category with IP diversity"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get recent requests
+    cursor.execute("""
+        SELECT timestamp, ip, path, user_agent, referer, status
+        FROM bot_traffic 
+        ORDER BY id DESC 
+        LIMIT 5000
+    """)
+    
+    entries = [dict_from_row(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    # Classify and filter by category
+    filtered_results = []
+    ip_count = {}
+    MAX_PER_IP = 3
+    MAX_TOTAL = 50
+    
+    for entry in entries:
+        details = classify_traffic_detailed(entry['user_agent'], entry['path'])
+        
+        if details['category'] == category:
+            current_ip = entry['ip']
+            
+            if ip_count.get(current_ip, 0) >= MAX_PER_IP:
+                continue
+            
+            filtered_results.append({
+                'timestamp': entry['timestamp'],
+                'ip': entry['ip'],
+                'path': entry['path'],
+                'user_agent': entry['user_agent'],
+                'referer': entry['referer'],
+                'status': entry['status'],
+                'category': details['category'],
+                'threat_level': details['threat_level'],
+                'threat_score': details['threat_score'],
+                'matched_patterns': details['matched_patterns']
+            })
+            
+            ip_count[current_ip] = ip_count.get(current_ip, 0) + 1
+            
+            if len(filtered_results) >= MAX_TOTAL:
+                break
+    
+    return jsonify(filtered_results)
+
+@app.route('/api/requests-by-ip/<ip>')
+@limiter.limit("30 per minute")
+def get_requests_by_ip(ip):
+    """Get recent requests from a specific IP"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get requests from this IP
+    cursor.execute("""
+        SELECT timestamp, ip, path, user_agent, referer, status
+        FROM bot_traffic 
+        WHERE ip = ?
+        ORDER BY id DESC 
+        LIMIT 50
+    """, (ip,))
+    
+    entries = [dict_from_row(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    # Classify each entry
+    results = []
+    for entry in entries:
+        details = classify_traffic_detailed(entry['user_agent'], entry['path'])
+        results.append({
+            'timestamp': entry['timestamp'],
+            'ip': entry['ip'],
+            'path': entry['path'],
+            'user_agent': entry['user_agent'],
+            'referer': entry['referer'],
+            'status': entry['status'],
+            'category': details['category'],
+            'threat_level': details['threat_level'],
+            'threat_score': details['threat_score'],
+            'matched_patterns': details['matched_patterns']
+        })
+    
+    return jsonify(results)
+
+@app.route('/api/requests-by-path')
+@limiter.limit("30 per minute")
+def get_requests_by_path():
+    """Get recent requests to a specific path (path passed as query parameter)"""
+    from flask import request
+    path = request.args.get('path', '')
+    
+    if not path:
+        return jsonify({'error': 'Path parameter required'}), 400
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get requests to this path with IP diversity
+    cursor.execute("""
+        SELECT timestamp, ip, path, user_agent, referer, status
+        FROM bot_traffic 
+        WHERE path = ?
+        ORDER BY id DESC 
+        LIMIT 200
+    """, (path,))
+    
+    entries = [dict_from_row(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    # Apply IP diversity
+    filtered_results = []
+    ip_count = {}
+    MAX_PER_IP = 3
+    MAX_TOTAL = 50
+    
+    for entry in entries:
+        current_ip = entry['ip']
+        
+        if ip_count.get(current_ip, 0) >= MAX_PER_IP:
+            continue
+        
+        details = classify_traffic_detailed(entry['user_agent'], entry['path'])
+        filtered_results.append({
+            'timestamp': entry['timestamp'],
+            'ip': entry['ip'],
+            'path': entry['path'],
+            'user_agent': entry['user_agent'],
+            'referer': entry['referer'],
+            'status': entry['status'],
+            'category': details['category'],
+            'threat_level': details['threat_level'],
+            'threat_score': details['threat_score'],
+            'matched_patterns': details['matched_patterns']
+        })
+        
+        ip_count[current_ip] = ip_count.get(current_ip, 0) + 1
+        
+        if len(filtered_results) >= MAX_TOTAL:
+            break
+    
+    return jsonify(filtered_results)
+
+@app.route('/api/requests-by-pattern')
+@limiter.limit("30 per minute")
+def get_requests_by_pattern():
+    """Get recent requests matching a pattern (pattern passed as query parameter)"""
+    from flask import request
+    pattern = request.args.get('pattern', '')
+    
+    if not pattern:
+        return jsonify({'error': 'Pattern parameter required'}), 400
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get requests matching the pattern
+    cursor.execute("""
+        SELECT timestamp, ip, path, user_agent, referer, status
+        FROM bot_traffic 
+        WHERE path LIKE ?
+        ORDER BY id DESC 
+        LIMIT 500
+    """, (pattern,))
+    
+    entries = [dict_from_row(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    # Apply IP diversity
+    filtered_results = []
+    ip_count = {}
+    MAX_PER_IP = 3
+    MAX_TOTAL = 50
+    
+    for entry in entries:
+        current_ip = entry['ip']
+        
+        if ip_count.get(current_ip, 0) >= MAX_PER_IP:
+            continue
+        
+        details = classify_traffic_detailed(entry['user_agent'], entry['path'])
+        filtered_results.append({
+            'timestamp': entry['timestamp'],
+            'ip': entry['ip'],
+            'path': entry['path'],
+            'user_agent': entry['user_agent'],
+            'referer': entry['referer'],
+            'status': entry['status'],
+            'category': details['category'],
+            'threat_level': details['threat_level'],
+            'threat_score': details['threat_score'],
+            'matched_patterns': details['matched_patterns']
+        })
+        
+        ip_count[current_ip] = ip_count.get(current_ip, 0) + 1
+        
+        if len(filtered_results) >= MAX_TOTAL:
+            break
     
     return jsonify(filtered_results)
 

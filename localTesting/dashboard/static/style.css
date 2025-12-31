@@ -650,6 +650,89 @@ footer a:hover {
     transform: translateY(-2px);
 }
 
+/* Make charts clickable */
+.chart-card canvas {
+    cursor: pointer;
+}
+
+.chart-card canvas:hover {
+    opacity: 0.9;
+}
+
+/* IP Info Button */
+.ipinfo-btn {
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ipinfo-btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.ipinfo-btn:active {
+    transform: translateY(0);
+}
+
+.ipinfo-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* IP Info Container */
+.ipinfo-container {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: rgba(37, 99, 235, 0.1);
+    border: 1px solid var(--primary-color);
+    border-radius: 6px;
+}
+
+.ipinfo-content {
+    font-size: 0.9rem;
+}
+
+.ipinfo-header {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.ipinfo-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ipinfo-item {
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.ipinfo-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.ipinfo-error {
+    color: var(--danger-color);
+    text-align: center;
+    padding: 0.5rem;
+}
+
 /* Responsive modal */
 @media (max-width: 768px) {
     .modal-content {

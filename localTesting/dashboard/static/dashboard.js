@@ -4,6 +4,12 @@
 // Chart instances
 let categoriesChart, attackTypesChart, topIpsChart, topPathsChart, timelineChart;
 
+// Data mappings for chart clicks
+let categoryDataMap = [];
+let ipDataMap = [];
+let pathDataMap = [];
+let patternDataMap = {};
+
 // Chart colors
 const chartColors = {
     primary: 'rgba(37, 99, 235, 0.8)',
@@ -66,6 +72,14 @@ function initializeCharts() {
                         }
                     }
                 }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const categoryName = categoriesChart.data.labels[index];
+                    const originalCategory = categoryDataMap[index];
+                    openRequestModal('category', originalCategory, `${categoryName} Requests`);
+                }
             }
         }
     });
@@ -93,6 +107,16 @@ function initializeCharts() {
             scales: {
                 y: {
                     beginAtZero: true
+                }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const attackType = attackTypesChart.data.labels[index];
+                    const pattern = patternDataMap[attackType];
+                    if (pattern) {
+                        openRequestModal('pattern', pattern, `${attackType} Requests`);
+                    }
                 }
             }
         }
@@ -123,6 +147,15 @@ function initializeCharts() {
                 x: {
                     beginAtZero: true
                 }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const ip = ipDataMap[index];
+                    if (ip) {
+                        openRequestModal('ip', ip, `Requests from ${ip}`);
+                    }
+                }
             }
         }
     });
@@ -151,6 +184,15 @@ function initializeCharts() {
             scales: {
                 x: {
                     beginAtZero: true
+                }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const path = pathDataMap[index];
+                    if (path) {
+                        openRequestModal('path', path, `Requests to ${path}`);
+                    }
                 }
             }
         }
@@ -216,6 +258,9 @@ async function loadStats() {
     
     // Update categories chart (top 10 categories)
     if (data.categories && data.categories.length > 0) {
+        // Store original category names for click handling
+        categoryDataMap = data.categories.map(c => c.name);
+        
         updateChart(categoriesChart, 
             data.categories.map(c => formatCategoryName(c.name)),
             data.categories.map(c => c.count)
@@ -248,6 +293,9 @@ async function loadTopIps() {
     const response = await fetch('/api/top-ips');
     const data = await response.json();
     
+    // Store IPs for click handling
+    ipDataMap = data.map(item => item.ip);
+    
     updateChart(topIpsChart,
         data.map(item => item.ip),
         data.map(item => item.count)
@@ -259,7 +307,10 @@ async function loadTopPaths() {
     const response = await fetch('/api/top-paths');
     const data = await response.json();
     
-    // Truncate long paths
+    // Store full paths for click handling
+    pathDataMap = data.map(item => item.path);
+    
+    // Truncate long paths for display
     const labels = data.map(item => 
         item.path.length > 40 ? item.path.substring(0, 40) + '...' : item.path
     );
@@ -290,6 +341,12 @@ async function loadTimeline() {
 async function loadAttackTypes() {
     const response = await fetch('/api/attack-types');
     const data = await response.json();
+    
+    // Store pattern mapping for click handling
+    patternDataMap = {};
+    data.forEach(item => {
+        patternDataMap[item.type] = item.pattern;
+    });
     
     updateChart(attackTypesChart,
         data.map(item => item.type),
@@ -366,20 +423,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const threatLevel = this.classList.contains('benign') ? 'benign' :
                               this.classList.contains('reconnaissance') ? 'reconnaissance' :
                               'malicious';
-            openThreatModal(threatLevel);
+            const titles = {
+                'benign': 'Benign Traffic Analysis',
+                'reconnaissance': 'Reconnaissance Traffic Analysis',
+                'malicious': 'Malicious Traffic Analysis'
+            };
+            openRequestModal('threat', threatLevel, titles[threatLevel]);
         });
     });
 });
 
-// Open modal
-function openThreatModal(threatLevel) {
-    const titles = {
-        'benign': 'Benign Traffic Analysis',
-        'reconnaissance': 'Reconnaissance Traffic Analysis',
-        'malicious': 'Malicious Traffic Analysis'
-    };
-    
-    modalTitle.textContent = titles[threatLevel] || 'Traffic Analysis';
+// Generic modal opener for all filter types
+function openRequestModal(filterType, filterValue, displayTitle) {
+    modalTitle.textContent = displayTitle || 'Request Analysis';
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     
@@ -388,8 +444,8 @@ function openThreatModal(threatLevel) {
     modalRequests.style.display = 'none';
     modalRequests.innerHTML = '';
     
-    // Fetch data
-    loadThreatRequests(threatLevel);
+    // Fetch data based on filter type
+    loadFilteredRequests(filterType, filterValue);
 }
 
 // Close modal
@@ -408,17 +464,39 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Load threat requests
-async function loadThreatRequests(threatLevel) {
+// Load filtered requests (generic for all filter types)
+async function loadFilteredRequests(filterType, filterValue) {
     try {
-        const response = await fetch(`/api/requests-by-threat/${threatLevel}`);
+        // Build endpoint URL based on filter type
+        let endpoint;
+        switch(filterType) {
+            case 'threat':
+                endpoint = `/api/requests-by-threat/${encodeURIComponent(filterValue)}`;
+                break;
+            case 'category':
+                endpoint = `/api/requests-by-category/${encodeURIComponent(filterValue)}`;
+                break;
+            case 'ip':
+                endpoint = `/api/requests-by-ip/${encodeURIComponent(filterValue)}`;
+                break;
+            case 'path':
+                endpoint = `/api/requests-by-path?path=${encodeURIComponent(filterValue)}`;
+                break;
+            case 'pattern':
+                endpoint = `/api/requests-by-pattern?pattern=${encodeURIComponent(filterValue)}`;
+                break;
+            default:
+                throw new Error('Invalid filter type');
+        }
+        
+        const response = await fetch(endpoint);
         const requests = await response.json();
         
         modalLoading.style.display = 'none';
         modalRequests.style.display = 'block';
         
         if (requests.length === 0) {
-            modalRequests.innerHTML = '<div class="modal-loading">No requests found for this threat level</div>';
+            modalRequests.innerHTML = '<div class="modal-loading">No requests found</div>';
             return;
         }
         
@@ -429,7 +507,7 @@ async function loadThreatRequests(threatLevel) {
         // Build request cards
         modalRequests.innerHTML = requests.map(req => createRequestCard(req)).join('');
     } catch (error) {
-        console.error('Error loading threat requests:', error);
+        console.error('Error loading requests:', error);
         modalLoading.style.display = 'none';
         modalRequests.style.display = 'block';
         modalRequests.innerHTML = '<div class="modal-loading">Error loading requests. Please try again.</div>';
@@ -442,17 +520,22 @@ function createRequestCard(request) {
         ? request.matched_patterns.map(p => `<div class="classification-item">${escapeHtml(p)}</div>`).join('')
         : '<div class="classification-item">No specific patterns matched</div>';
     
+    const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
+    
     return `
-        <div class="request-card">
+        <div class="request-card" id="${cardId}">
             <div class="request-header">
                 <div class="request-meta">
                     <span class="request-time">${escapeHtml(request.timestamp)}</span>
                     <span class="request-ip">${escapeHtml(request.ip)}</span>
+                    <button class="ipinfo-btn" onclick="fetchIPInfo('${escapeHtml(request.ip)}', '${cardId}')">ipinfo</button>
                 </div>
                 <div class="threat-badge ${request.threat_level}">
                     ${request.threat_level} - Score: ${request.threat_score}
                 </div>
             </div>
+            
+            <div class="ipinfo-container" id="${cardId}-ipinfo" style="display: none;"></div>
             
             <div class="request-section">
                 <div class="request-label">Request Payload</div>
@@ -486,4 +569,56 @@ function createRequestCard(request) {
             </div>
         </div>
     `;
+}
+
+// Fetch and display IP information
+async function fetchIPInfo(ip, cardId) {
+    const container = document.getElementById(`${cardId}-ipinfo`);
+    const btn = event.target;
+    
+    // Toggle visibility if already loaded
+    if (container.innerHTML && container.style.display === 'block') {
+        container.style.display = 'none';
+        btn.textContent = 'ipinfo';
+        return;
+    }
+    
+    // Show loading state
+    btn.textContent = 'loading...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch(`https://ipinfo.io/${ip}/json`);
+        const data = await response.json();
+        
+        // Build info display
+        container.innerHTML = `
+            <div class="ipinfo-content">
+                <div class="ipinfo-header">IP Information for ${ip}</div>
+                <div class="ipinfo-grid">
+                    ${data.city ? `<div class="ipinfo-item"><span class="ipinfo-label">Location:</span> ${escapeHtml(data.city)}, ${escapeHtml(data.region)}, ${escapeHtml(data.country)}</div>` : ''}
+                    ${data.loc ? `<div class="ipinfo-item"><span class="ipinfo-label">Coordinates:</span> ${escapeHtml(data.loc)}</div>` : ''}
+                    ${data.org ? `<div class="ipinfo-item"><span class="ipinfo-label">Organization:</span> ${escapeHtml(data.org)}</div>` : ''}
+                    ${data.hostname ? `<div class="ipinfo-item"><span class="ipinfo-label">Hostname:</span> ${escapeHtml(data.hostname)}</div>` : ''}
+                    ${data.timezone ? `<div class="ipinfo-item"><span class="ipinfo-label">Timezone:</span> ${escapeHtml(data.timezone)}</div>` : ''}
+                    ${data.postal ? `<div class="ipinfo-item"><span class="ipinfo-label">Postal:</span> ${escapeHtml(data.postal)}</div>` : ''}
+                </div>
+            </div>
+        `;
+        
+        container.style.display = 'block';
+        btn.textContent = 'hide';
+        btn.disabled = false;
+        
+    } catch (error) {
+        console.error('Error fetching IP info:', error);
+        container.innerHTML = `
+            <div class="ipinfo-content">
+                <div class="ipinfo-error">Failed to fetch IP information. API limit may be reached.</div>
+            </div>
+        `;
+        container.style.display = 'block';
+        btn.textContent = 'ipinfo';
+        btn.disabled = false;
+    }
 }
