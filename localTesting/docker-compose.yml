@@ -34,6 +34,7 @@ services:
     environment:
       - DB_PATH=/data/bot_data.db
       - PORT=8080
+      - IPINFO_TOKEN=${IPINFO_TOKEN}
     depends_on:
       - parser
     networks:

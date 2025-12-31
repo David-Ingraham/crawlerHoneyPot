@@ -9,6 +9,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from collections import Counter
 import os
+import requests
 from classifier import classify_traffic, classify_entries, classify_traffic_detailed
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -26,6 +27,12 @@ limiter = Limiter(
 # Database path
 DB_PATH = os.getenv('DB_PATH', '/data/bot_data.db')
 
+# Get ipinfo.io API token from environment
+IPINFO_TOKEN = os.getenv('IPINFO_TOKEN', '')
+
+# In-memory cache for IP geolocation data
+geo_cache = {}
+
 def get_db():
     """Get database connection"""
     conn = sqlite3.connect(DB_PATH)
@@ -35,6 +42,58 @@ def get_db():
 def dict_from_row(row):
     """Convert sqlite Row to dict"""
     return dict(zip(row.keys(), row))
+
+def get_ip_geolocation(ip):
+    """Fetch and cache IP geolocation data using Bearer token auth"""
+    # Check in-memory cache first
+    if ip in geo_cache:
+        return geo_cache[ip]
+    
+    # Fetch from ipinfo.io
+    try:
+        headers = {}
+        if IPINFO_TOKEN:
+            headers['Authorization'] = f'Bearer {IPINFO_TOKEN}'
+        
+        response = requests.get(f'https://ipinfo.io/{ip}/json', headers=headers, timeout=3)
+        data = response.json()
+        
+        # Check if we got an error response
+        if 'error' in data:
+            print(f"ipinfo.io error for {ip}: {data['error']}")
+            geo_cache[ip] = None
+            return None
+        
+        # Parse coordinates
+        loc = data.get('loc', '0,0')
+        if ',' in loc:
+            lat, lng = loc.split(',')
+            lat, lng = float(lat), float(lng)
+        else:
+            lat, lng = 0.0, 0.0
+        
+        result = {
+            'ip': ip,
+            'latitude': lat,
+            'longitude': lng,
+            'city': data.get('city'),
+            'region': data.get('region'),
+            'country': data.get('country'),
+            'org': data.get('org'),
+            'hostname': data.get('hostname'),
+            'loc': data.get('loc'),
+            'postal': data.get('postal'),
+            'timezone': data.get('timezone')
+        }
+        
+        # Store in memory cache
+        geo_cache[ip] = result
+        return result
+        
+    except Exception as e:
+        print(f"Error fetching geolocation for {ip}: {e}")
+        # Don't cache failures - allow retry
+        return None
 
 @app.route('/')
 def index():
@@ -578,6 +637,15 @@ def get_requests_by_pattern():
             break
     
     return jsonify(filtered_results)
+
+@app.route('/api/ipinfo/<ip>')
+@limiter.limit("30 per minute")
+def get_ipinfo(ip):
+    """Proxy endpoint for IP geolocation with Bearer token authentication"""
+    data = get_ip_geolocation(ip)
+    if data:
+        return jsonify(data)
+    return jsonify({'error': 'Could not fetch IP information'}), 404
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))

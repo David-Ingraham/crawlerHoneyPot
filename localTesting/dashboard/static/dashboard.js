@@ -588,7 +588,7 @@ async function fetchIPInfo(ip, cardId) {
     btn.disabled = true;
     
     try {
-        const response = await fetch(`https://ipinfo.io/${ip}/json`);
+        const response = await fetch(`/api/ipinfo/${ip}`);
         const data = await response.json();
         
         // Build info display
