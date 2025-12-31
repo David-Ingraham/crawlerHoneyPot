@@ -120,6 +120,21 @@
         <a href="/about">Learn more about this project</a></p>
     </footer>
 
+    <!-- Threat Details Modal -->
+    <div id="threat-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Threat Details</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-loading" class="modal-loading">Loading requests...</div>
+                <div id="modal-requests" class="request-list"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 </body>
 </html>

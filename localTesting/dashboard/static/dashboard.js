@@ -56,7 +56,15 @@ function initializeCharts() {
             maintainAspectRatio: true,
             plugins: {
                 legend: {
-                    position: 'bottom',
+                    position: 'right',
+                    align: 'center',
+                    labels: {
+                        boxWidth: 15,
+                        padding: 10,
+                        font: {
+                            size: 11
+                        }
+                    }
                 }
             }
         }
@@ -209,7 +217,7 @@ async function loadStats() {
     // Update categories chart (top 10 categories)
     if (data.categories && data.categories.length > 0) {
         updateChart(categoriesChart, 
-            data.categories.map(c => c.name),
+            data.categories.map(c => formatCategoryName(c.name)),
             data.categories.map(c => c.count)
         );
     }
@@ -328,4 +336,154 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Format category names for display
+function formatCategoryName(name) {
+    return name
+        .replace('benign_', '')
+        .replace('malicious_', '')
+        .replace('recon_', '')
+        .replace('scanner_', '')
+        .replace('generic_', '')
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
 
+// Modal functionality
+const modal = document.getElementById('threat-modal');
+const modalOverlay = modal.querySelector('.modal-overlay');
+const modalClose = modal.querySelector('.modal-close');
+const modalTitle = document.getElementById('modal-title');
+const modalLoading = document.getElementById('modal-loading');
+const modalRequests = document.getElementById('modal-requests');
+
+// Add click handlers to threat cards
+document.addEventListener('DOMContentLoaded', function() {
+    const threatCards = document.querySelectorAll('.threat-card');
+    threatCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const threatLevel = this.classList.contains('benign') ? 'benign' :
+                              this.classList.contains('reconnaissance') ? 'reconnaissance' :
+                              'malicious';
+            openThreatModal(threatLevel);
+        });
+    });
+});
+
+// Open modal
+function openThreatModal(threatLevel) {
+    const titles = {
+        'benign': 'Benign Traffic Analysis',
+        'reconnaissance': 'Reconnaissance Traffic Analysis',
+        'malicious': 'Malicious Traffic Analysis'
+    };
+    
+    modalTitle.textContent = titles[threatLevel] || 'Traffic Analysis';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Show loading state
+    modalLoading.style.display = 'block';
+    modalRequests.style.display = 'none';
+    modalRequests.innerHTML = '';
+    
+    // Fetch data
+    loadThreatRequests(threatLevel);
+}
+
+// Close modal
+function closeModal() {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', closeModal);
+
+// Close on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Load threat requests
+async function loadThreatRequests(threatLevel) {
+    try {
+        const response = await fetch(`/api/requests-by-threat/${threatLevel}`);
+        const requests = await response.json();
+        
+        modalLoading.style.display = 'none';
+        modalRequests.style.display = 'block';
+        
+        if (requests.length === 0) {
+            modalRequests.innerHTML = '<div class="modal-loading">No requests found for this threat level</div>';
+            return;
+        }
+        
+        // Update title with count
+        const baseTitle = modalTitle.textContent.split(' - ')[0];
+        modalTitle.textContent = `${baseTitle} - Showing ${requests.length} requests`;
+        
+        // Build request cards
+        modalRequests.innerHTML = requests.map(req => createRequestCard(req)).join('');
+    } catch (error) {
+        console.error('Error loading threat requests:', error);
+        modalLoading.style.display = 'none';
+        modalRequests.style.display = 'block';
+        modalRequests.innerHTML = '<div class="modal-loading">Error loading requests. Please try again.</div>';
+    }
+}
+
+// Create request card HTML
+function createRequestCard(request) {
+    const patterns = request.matched_patterns && request.matched_patterns.length > 0
+        ? request.matched_patterns.map(p => `<div class="classification-item">${escapeHtml(p)}</div>`).join('')
+        : '<div class="classification-item">No specific patterns matched</div>';
+    
+    return `
+        <div class="request-card">
+            <div class="request-header">
+                <div class="request-meta">
+                    <span class="request-time">${escapeHtml(request.timestamp)}</span>
+                    <span class="request-ip">${escapeHtml(request.ip)}</span>
+                </div>
+                <div class="threat-badge ${request.threat_level}">
+                    ${request.threat_level} - Score: ${request.threat_score}
+                </div>
+            </div>
+            
+            <div class="request-section">
+                <div class="request-label">Request Payload</div>
+                <div class="request-value">${escapeHtml(request.path)}</div>
+            </div>
+            
+            <div class="request-section">
+                <div class="request-label">User Agent</div>
+                <div class="request-value">${escapeHtml(request.user_agent)}</div>
+            </div>
+            
+            <div class="request-section">
+                <div class="request-label">Classification Details</div>
+                <div class="classification-details">
+                    <div class="classification-item">Category: <strong>${escapeHtml(request.category)}</strong></div>
+                    <div class="classification-item">Threat Score: <span class="score-display">${request.threat_score}/100</span></div>
+                    ${patterns}
+                </div>
+            </div>
+            
+            ${request.referer && request.referer !== '-' ? `
+            <div class="request-section">
+                <div class="request-label">Referer</div>
+                <div class="request-value">${escapeHtml(request.referer)}</div>
+            </div>
+            ` : ''}
+            
+            <div class="request-section">
+                <div class="request-label">Response Status</div>
+                <div class="request-value">HTTP ${request.status}</div>
+            </div>
+        </div>
+    `;
+}

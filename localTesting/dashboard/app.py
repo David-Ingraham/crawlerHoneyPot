@@ -9,7 +9,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from collections import Counter
 import os
-from classifier import classify_traffic, classify_entries
+from classifier import classify_traffic, classify_entries, classify_traffic_detailed
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -310,6 +310,67 @@ def get_malicious_activity():
     
     conn.close()
     return jsonify(results)
+
+@app.route('/api/requests-by-threat/<threat_level>')
+@limiter.limit("30 per minute")
+def get_requests_by_threat(threat_level):
+    """Get recent requests filtered by threat level with IP diversity"""
+    # Validate threat level
+    if threat_level not in ['benign', 'reconnaissance', 'malicious']:
+        return jsonify({'error': 'Invalid threat level'}), 400
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get recent requests with all details (larger pool for better diversity)
+    cursor.execute("""
+        SELECT timestamp, ip, path, user_agent, referer, status
+        FROM bot_traffic 
+        ORDER BY id DESC 
+        LIMIT 5000
+    """)
+    
+    entries = [dict_from_row(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    # Classify and filter with IP diversity
+    filtered_results = []
+    ip_count = {}
+    MAX_PER_IP = 3
+    MAX_TOTAL = 50
+    
+    for entry in entries:
+        details = classify_traffic_detailed(entry['user_agent'], entry['path'])
+        
+        if details['threat_level'] == threat_level:
+            current_ip = entry['ip']
+            
+            # Check if we've already added 3 from this IP
+            if ip_count.get(current_ip, 0) >= MAX_PER_IP:
+                continue
+            
+            # Add the request
+            filtered_results.append({
+                'timestamp': entry['timestamp'],
+                'ip': entry['ip'],
+                'path': entry['path'],
+                'user_agent': entry['user_agent'],
+                'referer': entry['referer'],
+                'status': entry['status'],
+                'category': details['category'],
+                'threat_level': details['threat_level'],
+                'threat_score': details['threat_score'],
+                'matched_patterns': details['matched_patterns']
+            })
+            
+            # Increment counter for this IP
+            ip_count[current_ip] = ip_count.get(current_ip, 0) + 1
+            
+            # Limit to 50 total results
+            if len(filtered_results) >= MAX_TOTAL:
+                break
+    
+    return jsonify(filtered_results)
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
