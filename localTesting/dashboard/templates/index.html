@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Honeypot Threat Dashboard</title>
+    <title>Honeypot Traffic Analysis Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
@@ -15,7 +15,7 @@
 <body>
     <nav>
         <div class="nav-content">
-            <h1>Honeypot Threat Dashboard</h1>
+            <h1>Honeypot Traffic Analysis Dashboard</h1>
             <div class="nav-links">
                 <a href="/" class="active">Dashboard</a>
                 <a href="/about">About</a>
@@ -75,7 +75,7 @@
                 <canvas id="categoriesChart"></canvas>
             </div>
             <div class="chart-card">
-                <h2>Reconnaissance Patterns</h2>
+                <h2>Targeted Vulnerability Scans</h2>
                 <canvas id="attackTypesChart"></canvas>
             </div>
         </div>
@@ -83,11 +83,11 @@
         <!-- Charts Row 2 -->
         <div class="chart-grid">
             <div class="chart-card">
-                <h2>Top 10 Attacking IPs</h2>
+                <h2>Top 10 Source IPs by Request Volume</h2>
                 <canvas id="topIpsChart"></canvas>
             </div>
             <div class="chart-card">
-                <h2>Most Targeted Paths</h2>
+                <h2>Most Requested Paths</h2>
                 <canvas id="topPathsChart"></canvas>
             </div>
         </div>
@@ -95,7 +95,7 @@
         <!-- Timeline Chart (Full Width) -->
         <div class="chart-card full-width">
             <div class="chart-header">
-                <h2>Attack Timeline</h2>
+                <h2>Request Timeline</h2>
                 <div class="timeline-controls">
                     <button class="timeline-btn active" data-days="7">Week</button>
                     <button class="timeline-btn" data-days="14">2 Weeks</button>
@@ -106,15 +106,15 @@
             <canvas id="timelineChart"></canvas>
         </div>
 
-        <!-- Attack Origins Map -->
+        <!-- Geographic Distribution Map -->
         <div class="chart-card full-width">
-            <h2>Attack Origins Map</h2>
+            <h2>Geographic Distribution of Traffic</h2>
             <div id="attack-map"></div>
         </div>
 
-        <!-- Recent Attacks Table -->
+        <!-- Recent Requests Table -->
         <div class="table-card">
-            <h2>Recent Attacks</h2>
+            <h2>Recent Requests</h2>
             <div class="table-container">
                 <table id="recent-attacks">
                     <thead>
@@ -139,12 +139,12 @@
         <a href="/about">Learn more about this project</a></p>
     </footer>
 
-    <!-- Threat Details Modal -->
+    <!-- Request Details Modal -->
     <div id="threat-modal" class="modal">
         <div class="modal-overlay"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">Threat Details</h2>
+                <h2 id="modal-title">Request Details</h2>
                 <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">

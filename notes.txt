@@ -1,3 +1,30 @@
+on most requested paths we also repeatee 70 for amount of hits on the bottom quaters or so. 
+need to see what backend api is returning and check againstthe db.
+
+
+need to switch to wsgi for dashboard backend . 
+its also hard to assume the requst are really malicious or just bluetema security researches gauging public exposure to attacks. so we need to address the use of the word "malicious" as well
+
+
+remove "attack" mentoins. use more academic, descriptive  language. not every reqesut is a attack.
+many are just for root 
+
+
+The modals are losing pretty slow. But once one loads they all load. only hapens in prod not on local host
+
+Reconnaissance Patterns Bar chart. These are really the interesting malicious ones. Are there other ways to say malicious?
+
+Top attacking ips is too strong with the language. Needs to be more plain. Top visiting its? Most active IPs?
+
+Attack timeline is also kind obnoxious. maybe just honey pot timeline
+
+Attack origins, also obnoxious, Just traffic origins is better
+
+are the exalples of sql injection really sql injection? i mean idk why the yeah we are getting 
+request for things like this. 
+
+**EOP**
+
 added verfication file for google
 
 tried to post my url on reddit wallstreetbets but it was rejected, still got two differetn reddit bots
