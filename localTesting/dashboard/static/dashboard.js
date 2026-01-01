@@ -10,6 +10,9 @@ let ipDataMap = [];
 let pathDataMap = [];
 let patternDataMap = {};
 
+// Timeline settings
+let currentTimelineDays = 7;
+
 // Chart colors
 const chartColors = {
     primary: 'rgba(37, 99, 235, 0.8)',
@@ -39,6 +42,7 @@ Chart.defaults.borderColor = '#334155';
 document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     initializeMap();
+    initializeTimelineControls();
     loadInitialData();
     
     // Refresh data every 30 seconds (without reloading map)
@@ -332,9 +336,25 @@ async function loadTopPaths() {
     );
 }
 
+// Initialize timeline controls
+function initializeTimelineControls() {
+    const buttons = document.querySelectorAll('.timeline-btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active state
+            buttons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Load new timeline data
+            currentTimelineDays = parseInt(this.dataset.days);
+            loadTimeline();
+        });
+    });
+}
+
 // Load timeline
 async function loadTimeline() {
-    const response = await fetch('/api/timeline');
+    const response = await fetch(`/api/timeline?days=${currentTimelineDays}`);
     const data = await response.json();
     
     // Format timestamps for display

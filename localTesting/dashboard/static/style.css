@@ -751,6 +751,50 @@ footer a:hover {
     font-size: 1.1em;
 }
 
+/* Timeline Controls */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.chart-header h2 {
+    margin: 0;
+}
+
+.timeline-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.timeline-btn {
+    padding: 0.5rem 1rem;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.timeline-btn:hover {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+.timeline-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
 /* Responsive modal */
 @media (max-width: 768px) {
     .modal-content {

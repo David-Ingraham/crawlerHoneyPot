@@ -94,7 +94,15 @@
 
         <!-- Timeline Chart (Full Width) -->
         <div class="chart-card full-width">
-            <h2>Attack Timeline (Last 7 Days)</h2>
+            <div class="chart-header">
+                <h2>Attack Timeline</h2>
+                <div class="timeline-controls">
+                    <button class="timeline-btn active" data-days="7">Week</button>
+                    <button class="timeline-btn" data-days="14">2 Weeks</button>
+                    <button class="timeline-btn" data-days="30">Month</button>
+                    <button class="timeline-btn" data-days="0">All Time</button>
+                </div>
+            </div>
             <canvas id="timelineChart"></canvas>
         </div>
 

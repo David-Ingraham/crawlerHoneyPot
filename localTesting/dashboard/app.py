@@ -265,21 +265,57 @@ def get_top_paths():
 @app.route('/api/timeline')
 @limiter.limit("30 per minute")
 def get_timeline():
-    """Get requests over time"""
+    """Get requests over time with configurable time range"""
+    from flask import request
+    days = request.args.get('days', 7, type=int)
+    
     conn = get_db()
     cursor = conn.cursor()
     
-    # Get last 168 hours (7 days)
-    cursor.execute("""
-        SELECT timestamp, COUNT(*) as count
-        FROM bot_traffic
-        GROUP BY substr(timestamp, 1, 17)
-        ORDER BY timestamp DESC
-        LIMIT 168
-    """)
+    # Get records grouped by hour, using id for chronological ordering
+    if days == 0:  # All time
+        cursor.execute("""
+            SELECT 
+                substr(timestamp, 1, 17) as hour,
+                COUNT(*) as count,
+                MIN(id) as first_id
+            FROM bot_traffic
+            GROUP BY hour
+            ORDER BY first_id ASC
+        """)
+    else:
+        # Get the cutoff ID for the time range
+        # First, get total record count
+        cursor.execute("SELECT MAX(id) FROM bot_traffic")
+        max_id = cursor.fetchone()['MAX(id)'] or 0
+        
+        # Estimate records per day and calculate cutoff
+        # Use 2x the expected records to handle sparse data
+        cursor.execute("SELECT COUNT(*) FROM bot_traffic")
+        total_records = cursor.fetchone()['COUNT(*)']
+        
+        # Get earliest ID in our dataset
+        cursor.execute("SELECT MIN(id) FROM bot_traffic")
+        min_id = cursor.fetchone()['MIN(id)'] or 0
+        
+        # Calculate approximate cutoff ID for the time range
+        # Using a buffer to ensure we get the full time range
+        records_estimate = int((total_records / 31) * days * 1.3)  # Assume ~31 days of data, 1.3x buffer
+        cutoff_id = max(min_id, max_id - records_estimate)
+        
+        cursor.execute("""
+            SELECT 
+                substr(timestamp, 1, 17) as hour,
+                COUNT(*) as count,
+                MIN(id) as first_id
+            FROM bot_traffic
+            WHERE id >= ?
+            GROUP BY hour
+            ORDER BY first_id ASC
+        """, (cutoff_id,))
     
-    timeline = [{'time': row['timestamp'], 'count': row['count']} for row in cursor.fetchall()]
-    timeline.reverse()
+    timeline = [{'time': row['hour'], 'count': row['count']} 
+                for row in cursor.fetchall()]
     
     conn.close()
     
