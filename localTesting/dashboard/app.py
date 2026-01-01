@@ -44,12 +44,33 @@ def dict_from_row(row):
     return dict(zip(row.keys(), row))
 
 def get_ip_geolocation(ip):
-    """Fetch and cache IP geolocation data using Bearer token auth"""
-    # Check in-memory cache first
+    """Fetch IP geolocation: memory → database → API (read-only dashboard)"""
+    # Check in-memory cache first (fastest)
     if ip in geo_cache:
         return geo_cache[ip]
     
-    # Fetch from ipinfo.io
+    # Check database second (no API call needed for existing IPs)
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT ip, latitude, longitude, city, region, country, 
+                   org, hostname, postal, timezone
+            FROM ip_geolocation 
+            WHERE ip = ?
+        """, (ip,))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            result = dict_from_row(row)
+            result['loc'] = f"{result['latitude']},{result['longitude']}"
+            geo_cache[ip] = result
+            return result
+    except Exception as e:
+        print(f"Database lookup error for {ip}: {e}")
+    
+    # Fallback to API for new IPs not in database
     try:
         headers = {}
         if IPINFO_TOKEN:
@@ -61,7 +82,6 @@ def get_ip_geolocation(ip):
         # Check if we got an error response
         if 'error' in data:
             print(f"ipinfo.io error for {ip}: {data['error']}")
-            geo_cache[ip] = None
             return None
         
         # Parse coordinates
@@ -86,13 +106,12 @@ def get_ip_geolocation(ip):
             'timezone': data.get('timezone')
         }
         
-        # Store in memory cache
+        # Store in memory cache only (dashboard is read-only)
         geo_cache[ip] = result
         return result
         
     except Exception as e:
         print(f"Error fetching geolocation for {ip}: {e}")
-        # Don't cache failures - allow retry
         return None
 
 @app.route('/')
@@ -646,6 +665,36 @@ def get_ipinfo(ip):
     if data:
         return jsonify(data)
     return jsonify({'error': 'Could not fetch IP information'}), 404
+
+@app.route('/api/geo-locations')
+@limiter.limit("5 per minute")
+def get_geo_locations():
+    """Get geographic distribution of traffic from database"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Join traffic counts with geolocation data
+    cursor.execute("""
+        SELECT 
+            g.ip, 
+            g.latitude as lat, 
+            g.longitude as lng,
+            g.city, 
+            g.country,
+            COUNT(t.ip) as count
+        FROM ip_geolocation g
+        JOIN bot_traffic t ON g.ip = t.ip
+        WHERE g.latitude != 0 AND g.longitude != 0
+        GROUP BY g.ip
+        HAVING count > 2
+        ORDER BY count DESC
+        LIMIT 500
+    """)
+    
+    results = [dict_from_row(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    return jsonify(results)
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))

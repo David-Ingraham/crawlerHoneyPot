@@ -2,7 +2,7 @@
 // Handles real-time data updates and chart rendering
 
 // Chart instances
-let categoriesChart, attackTypesChart, topIpsChart, topPathsChart, timelineChart;
+let categoriesChart, attackTypesChart, topIpsChart, topPathsChart, timelineChart, attackMap;
 
 // Data mappings for chart clicks
 let categoryDataMap = [];
@@ -38,9 +38,10 @@ Chart.defaults.borderColor = '#334155';
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
-    loadAllData();
+    initializeMap();
+    loadInitialData();
     
-    // Refresh data every 30 seconds
+    // Refresh data every 30 seconds (without reloading map)
     setInterval(loadAllData, 30000);
 });
 
@@ -230,7 +231,17 @@ function initializeCharts() {
     });
 }
 
-// Load all data
+// Load initial data (includes map)
+async function loadInitialData() {
+    try {
+        await loadAllData();
+        await loadGeoLocations();
+    } catch (error) {
+        console.error('Error loading initial data:', error);
+    }
+}
+
+// Load all data (for periodic refresh, excludes map)
 async function loadAllData() {
     try {
         await Promise.all([
@@ -620,5 +631,76 @@ async function fetchIPInfo(ip, cardId) {
         container.style.display = 'block';
         btn.textContent = 'ipinfo';
         btn.disabled = false;
+    }
+}
+
+// Initialize attack origins map
+function initializeMap() {
+    attackMap = L.map('attack-map').setView([20, 0], 2);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(attackMap);
+}
+
+// Load geolocation data for the map
+async function loadGeoLocations() {
+    try {
+        const response = await fetch('/api/geo-locations');
+        const data = await response.json();
+        
+        // Clear existing markers
+        attackMap.eachLayer(layer => {
+            if (layer instanceof L.Marker || layer instanceof L.MarkerClusterGroup) {
+                attackMap.removeLayer(layer);
+            }
+        });
+        
+        // Create marker cluster group
+        const markers = L.markerClusterGroup({
+            maxClusterRadius: 50,
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                if (count > 50) size = 'large';
+                else if (count > 20) size = 'medium';
+                
+                return L.divIcon({
+                    html: '<div><span>' + count + '</span></div>',
+                    className: 'marker-cluster marker-cluster-' + size,
+                    iconSize: L.point(40, 40)
+                });
+            }
+        });
+        
+        // Add markers for each location
+        data.forEach(location => {
+            const marker = L.marker([location.lat, location.lng])
+                .bindPopup(`
+                    <strong>${location.ip}</strong><br>
+                    ${location.city}, ${location.country}<br>
+                    <strong>Requests:</strong> ${location.count}
+                    <br><br><em>Click marker to view requests</em>
+                `);
+            
+            // Add click handler to open modal with IP requests
+            marker.on('click', () => {
+                openRequestModal('ip', location.ip, `Requests from ${location.ip} (${location.city}, ${location.country})`);
+            });
+            
+            markers.addLayer(marker);
+        });
+        
+        attackMap.addLayer(markers);
+        
+        // Fit bounds to show all markers if data exists
+        if (data.length > 0) {
+            const bounds = markers.getBounds();
+            attackMap.fitBounds(bounds, { padding: [50, 50] });
+        }
+        
+    } catch (error) {
+        console.error('Error loading geo locations:', error);
     }
 }

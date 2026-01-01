@@ -733,6 +733,24 @@ footer a:hover {
     padding: 0.5rem;
 }
 
+/* Attack Map */
+#attack-map {
+    height: 500px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.leaflet-popup-content {
+    color: #1e293b;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.leaflet-popup-content strong {
+    color: #2563eb;
+    font-size: 1.1em;
+}
+
 /* Responsive modal */
 @media (max-width: 768px) {
     .modal-content {
