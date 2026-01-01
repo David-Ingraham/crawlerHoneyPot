@@ -658,9 +658,9 @@ async function fetchIPInfo(ip, cardId) {
 function initializeMap() {
     attackMap = L.map('attack-map').setView([20, 0], 2);
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 18
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap © CARTO',
+        maxZoom: 19
     }).addTo(attackMap);
 }
 
