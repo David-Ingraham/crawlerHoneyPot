@@ -75,6 +75,22 @@ nav h1 {
     padding: 0 2rem;
 }
 
+/* Introduction Section */
+.intro-section {
+    background: var(--card-bg);
+    border-left: 3px solid var(--primary-color);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+.intro-section p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+    max-width: 900px;
+}
+
 /* Stats Grid */
 .stats-grid {
     display: grid;
