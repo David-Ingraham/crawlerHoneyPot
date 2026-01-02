@@ -13,30 +13,30 @@ let patternDataMap = {};
 // Timeline settings
 let currentTimelineDays = 7;
 
-// Chart colors
+// Chart colors - Muted Professional Palette
 const chartColors = {
-    primary: 'rgba(37, 99, 235, 0.8)',
-    secondary: 'rgba(59, 130, 246, 0.8)',
-    success: 'rgba(16, 185, 129, 0.8)',
-    danger: 'rgba(239, 68, 68, 0.8)',
-    warning: 'rgba(245, 158, 11, 0.8)',
-    info: 'rgba(99, 102, 241, 0.8)',
+    primary: 'rgba(193, 122, 58, 0.8)',      // Muted bronze
+    secondary: 'rgba(139, 99, 50, 0.8)',     // Dark bronze
+    success: 'rgba(74, 124, 124, 0.8)',      // Slate teal
+    danger: 'rgba(139, 76, 76, 0.8)',        // Burgundy
+    warning: 'rgba(155, 139, 74, 0.8)',      // Olive gold
+    info: 'rgba(106, 106, 128, 0.8)',        // Muted slate purple
 };
 
 const colorPalette = [
-    'rgba(37, 99, 235, 0.8)',
-    'rgba(16, 185, 129, 0.8)',
-    'rgba(239, 68, 68, 0.8)',
-    'rgba(245, 158, 11, 0.8)',
-    'rgba(99, 102, 241, 0.8)',
-    'rgba(236, 72, 153, 0.8)',
-    'rgba(14, 165, 233, 0.8)',
-    'rgba(168, 85, 247, 0.8)',
+    'rgba(193, 122, 58, 0.8)',   // Bronze
+    'rgba(74, 124, 124, 0.8)',   // Teal
+    'rgba(139, 76, 76, 0.8)',    // Burgundy
+    'rgba(155, 139, 74, 0.8)',   // Olive
+    'rgba(106, 106, 128, 0.8)',  // Slate purple
+    'rgba(139, 99, 50, 0.8)',    // Dark bronze
+    'rgba(96, 96, 106, 0.8)',    // Steel gray
+    'rgba(122, 102, 86, 0.8)',   // Taupe
 ];
 
 // Chart.js default config
-Chart.defaults.color = '#94a3b8';
-Chart.defaults.borderColor = '#334155';
+Chart.defaults.color = '#808080';
+Chart.defaults.borderColor = '#2A2A2A';
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
@@ -213,7 +213,7 @@ function initializeCharts() {
                 label: 'Attacks per Hour',
                 data: [],
                 borderColor: chartColors.primary,
-                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                backgroundColor: 'rgba(193, 122, 58, 0.15)',
                 fill: true,
                 tension: 0.4
             }]
