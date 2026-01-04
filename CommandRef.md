@@ -1,5 +1,11 @@
 # Bot Honeypot - Command Reference
 
+
+## docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Merges: docker-compose.yml + overrides from prod
+# Result: Uses nginx/nginx.prod.conf (swapped by volume mount)
+#use on prod machine. this adds configurations to the docker environment that would be makes things messy in local development ie ssl cert
+
 ## Quick Start
 
 # Start honeypot
