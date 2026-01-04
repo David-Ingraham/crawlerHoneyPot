@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  # Production nginx overrides - adds HTTPS support
+  nginx:
+    ports:
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+
