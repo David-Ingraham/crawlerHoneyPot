@@ -5,23 +5,26 @@
 }
 
 :root {
-    --primary-color: #2563eb;
-    --secondary-color: #1e40af;
-    --success-color: #10b981;
-    --danger-color: #ef4444;
-    --warning-color: #f59e0b;
-    --dark-bg: #0f172a;
-    --card-bg: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --border-color: #334155;
+    /* Muted Professional Color Palette */
+    --primary-color: #C17A3A;        /* Muted Bronze/Copper */
+    --secondary-color: #8B6332;      /* Dark Bronze */
+    --success-color: #4A7C7C;        /* Muted Slate Teal */
+    --danger-color: #8B4C4C;         /* Muted Burgundy */
+    --warning-color: #9B8B4A;        /* Muted Gold/Olive */
+    --dark-bg: #000000;              /* Pure Black */
+    --card-bg: #0A0A0A;              /* Near Black */
+    --text-primary: #E0E0E0;         /* Soft White */
+    --text-secondary: #808080;       /* Medium Gray */
+    --border-color: #1A1A1A;         /* Dark Gray */
+    --accent-bar: #C17A3A;           /* Bronze accent */
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--dark-bg);
     color: var(--text-primary);
     line-height: 1.6;
+    letter-spacing: 0.2px;
 }
 
 /* Navigation */
@@ -31,7 +34,7 @@ nav {
     padding: 1rem 0;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 9999;
 }
 
 .nav-content {
@@ -72,6 +75,22 @@ nav h1 {
     padding: 0 2rem;
 }
 
+/* Introduction Section */
+.intro-section {
+    background: var(--card-bg);
+    border-left: 3px solid var(--primary-color);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+.intro-section p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+    max-width: 900px;
+}
+
 /* Stats Grid */
 .stats-grid {
     display: grid;
@@ -83,7 +102,7 @@ nav h1 {
 .stat-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.5rem;
     text-align: center;
     transition: transform 0.3s, box-shadow 0.3s;
@@ -96,9 +115,11 @@ nav h1 {
 
 .stat-value {
     font-size: 2.5rem;
-    font-weight: bold;
+    font-weight: 400;
     color: var(--primary-color);
     margin-bottom: 0.5rem;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    letter-spacing: -0.5px;
 }
 
 .stat-label {
@@ -133,38 +154,32 @@ nav h1 {
 
 .threat-card {
     background: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--border-color);
+    border-radius: 0;
     padding: 1.5rem;
     text-align: center;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: all 0.2s ease;
 }
 
 .threat-card.benign {
-    border-color: var(--success-color);
+    border-left-color: var(--success-color);
 }
 
 .threat-card.reconnaissance {
-    border-color: var(--warning-color);
+    border-left-color: var(--warning-color);
 }
 
 .threat-card.malicious {
-    border-color: var(--danger-color);
-}
-
-.threat-card:hover {
-    transform: translateY(-2px);
-}
-
-.threat-icon {
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
+    border-left-color: var(--danger-color);
 }
 
 .threat-value {
-    font-size: 2rem;
-    font-weight: bold;
+    font-size: 3rem;
+    font-weight: 400;
     margin-bottom: 0.25rem;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    letter-spacing: -0.5px;
 }
 
 .threat-card.benign .threat-value {
@@ -183,6 +198,7 @@ nav h1 {
     font-size: 1.1rem;
     color: var(--text-secondary);
     margin-bottom: 0.5rem;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
 }
 
 .threat-label {
@@ -203,7 +219,7 @@ nav h1 {
 .chart-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.5rem;
 }
 
@@ -225,7 +241,7 @@ canvas {
 .table-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -251,7 +267,7 @@ thead {
 th {
     text-align: left;
     padding: 1rem;
-    font-weight: 600;
+    font-weight: 400;
     color: var(--text-primary);
     border-bottom: 2px solid var(--primary-color);
 }
@@ -300,7 +316,7 @@ tbody tr:hover {
 .about-content section {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 2rem;
     margin-bottom: 2rem;
 }
@@ -356,7 +372,7 @@ tbody tr:hover {
     padding: 0.75rem 1.5rem;
     border-radius: 6px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 400;
     transition: background 0.3s;
 }
 
@@ -486,7 +502,7 @@ footer a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: 0;
     transition: all 0.2s;
 }
 
@@ -517,7 +533,7 @@ footer a:hover {
 .request-card {
     background: var(--dark-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.25rem;
     transition: all 0.2s;
 }
@@ -550,14 +566,14 @@ footer a:hover {
 .request-ip {
     font-family: 'Courier New', monospace;
     color: var(--primary-color);
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .threat-badge {
     padding: 0.25rem 0.75rem;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 400;
     text-transform: uppercase;
 }
 
@@ -590,7 +606,7 @@ footer a:hover {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 0.4rem;
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .request-value {
@@ -598,7 +614,7 @@ footer a:hover {
     color: var(--text-primary);
     background: rgba(0, 0, 0, 0.3);
     padding: 0.75rem;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 0.9rem;
     word-break: break-all;
     line-height: 1.5;
@@ -621,7 +637,7 @@ footer a:hover {
 .classification-item::before {
     content: "•";
     color: var(--primary-color);
-    font-weight: bold;
+    font-weight: normal;
     font-size: 1.2rem;
 }
 
@@ -629,25 +645,26 @@ footer a:hover {
     display: inline-block;
     padding: 0.15rem 0.5rem;
     background: rgba(37, 99, 235, 0.2);
-    border-radius: 4px;
+    border-radius: 0;
     color: var(--primary-color);
-    font-weight: 600;
+    font-weight: 400;
     font-size: 0.9rem;
 }
 
 /* Make threat cards clickable */
 .threat-card {
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .threat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    transform: translateX(2px);
+    border-left-width: 6px;
+    background: #111111;
 }
 
 .threat-card:active {
-    transform: translateY(-2px);
+    transform: translateX(0);
 }
 
 /* Make charts clickable */
@@ -666,9 +683,9 @@ footer a:hover {
     background: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 400;
     cursor: pointer;
     transition: all 0.2s;
     text-transform: uppercase;
@@ -704,7 +721,7 @@ footer a:hover {
 }
 
 .ipinfo-header {
-    font-weight: 600;
+    font-weight: 400;
     color: var(--primary-color);
     margin-bottom: 0.75rem;
     font-size: 1rem;
@@ -723,7 +740,7 @@ footer a:hover {
 
 .ipinfo-label {
     color: var(--text-secondary);
-    font-weight: 600;
+    font-weight: 400;
     margin-right: 0.5rem;
 }
 
@@ -731,6 +748,68 @@ footer a:hover {
     color: var(--danger-color);
     text-align: center;
     padding: 0.5rem;
+}
+
+/* Attack Map */
+#attack-map {
+    height: 500px;
+    width: 100%;
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.leaflet-popup-content {
+    color: #1e293b;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.leaflet-popup-content strong {
+    color: #2563eb;
+    font-size: 1.1em;
+}
+
+/* Timeline Controls */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.chart-header h2 {
+    margin: 0;
+}
+
+.timeline-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.timeline-btn {
+    padding: 0.5rem 1rem;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.timeline-btn:hover {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+.timeline-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
 }
 
 /* Responsive modal */
