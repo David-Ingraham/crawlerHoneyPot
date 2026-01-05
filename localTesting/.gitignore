@@ -2,3 +2,6 @@
 logs/*.log
 data/*.db.env
 data
+
+linkedinpost.txt
+

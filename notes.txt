@@ -1,3 +1,14 @@
+number 
+
+
+when you click on most requested paths, i want a siilar modal to what we have,
+but its just shows all the top requested paths and number of hits. bascially the output of this command 
+"SELECT path, COUNT(*) as hits FROM bot_traffic GROUP BY path ORDER BY hits DESC;"
+
+there can be 
+
+
+
 on most requested paths we also repeatee 70 for amount of hits on the bottom quaters or so. 
 need to see what backend api is returning and check againstthe db.
 
