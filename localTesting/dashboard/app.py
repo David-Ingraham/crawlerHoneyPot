@@ -4,12 +4,14 @@ Honeypot Dashboard
 Real-time visualization with on-the-fly traffic classification
 """
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, Response
 import sqlite3
 from datetime import datetime, timedelta
 from collections import Counter
 import os
 import requests
+import csv
+from io import StringIO
 from classifier import classify_traffic, classify_entries, classify_traffic_detailed
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -733,6 +735,53 @@ def get_geo_locations():
     conn.close()
     
     return jsonify(results)
+
+@app.route('/api/download-dataset')
+@limiter.limit("3 per hour")
+def download_dataset():
+    """Download full dataset as CSV"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get all data
+    cursor.execute("""
+        SELECT id, timestamp, ip, user_agent, path, status, referer
+        FROM bot_traffic 
+        ORDER BY id DESC
+    """)
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # Create CSV in memory
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow(['id', 'timestamp', 'ip', 'user_agent', 'path', 'status', 'referer'])
+    
+    # Write data
+    for row in rows:
+        writer.writerow([
+            row['id'],
+            row['timestamp'],
+            row['ip'],
+            row['user_agent'],
+            row['path'],
+            row['status'],
+            row['referer']
+        ])
+    
+    # Prepare response
+    output.seek(0)
+    
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={
+            'Content-Disposition': f'attachment; filename=honeypot_data_{datetime.now().strftime("%Y%m%d")}.csv'
+        }
+    )
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
