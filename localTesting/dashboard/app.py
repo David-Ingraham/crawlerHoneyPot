@@ -158,7 +158,8 @@ def get_stats():
             continue
     
     # Get all entries for classification (or sample if too large)
-    cursor.execute("SELECT user_agent, path FROM bot_traffic")
+    # Get recent entries (matches other endpoints for consistency)
+    cursor.execute("SELECT user_agent, path FROM bot_traffic ORDER BY id DESC LIMIT 5000")
     entries = [dict_from_row(row) for row in cursor.fetchall()]
     
     # Classify and aggregate
@@ -192,7 +193,7 @@ def get_threat_distribution():
     cursor = conn.cursor()
     
     # Get all entries
-    cursor.execute("SELECT user_agent, path FROM bot_traffic")
+    cursor.execute("SELECT user_agent, path FROM bot_traffic ORDER BY id DESC LIMIT 5000")
     entries = [dict_from_row(row) for row in cursor.fetchall()]
     
     # Classify and count
@@ -645,6 +646,7 @@ def get_requests_by_pattern():
     if not pattern:
         return jsonify({'error': 'Pattern parameter required'}), 400
     
+
     conn = get_db()
     cursor = conn.cursor()
     
