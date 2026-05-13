@@ -783,6 +783,41 @@ def download_dataset():
         }
     )
 
+@app.route('/api/chat', methods=['POST'])
+@limiter.limit("20 per minute")
+def chat():
+    """Natural language query: SQL toolkit + classified analytics (dashboard classifier)."""
+    from flask import request as flask_request
+    from chat_agent import run_honeypot_chat
+
+    data = flask_request.get_json(silent=True) or {}
+    user_message = data.get('message', '').strip()
+
+    if not user_message:
+        return jsonify({'error': 'message field required'}), 400
+
+    groq_key = os.getenv('GROQ_API_KEY', '')
+    if not groq_key:
+        return jsonify({'error': 'GROQ_API_KEY is not configured on the server'}), 503
+
+    model = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
+
+    try:
+        out = run_honeypot_chat(
+            db_path=DB_PATH,
+            user_message=user_message,
+            groq_api_key=groq_key,
+            model=model,
+        )
+        return jsonify({
+            'answer': out.get('answer', ''),
+            'trace': out.get('trace', []),
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
     app.run(host='0.0.0.0', port=port, debug=False)

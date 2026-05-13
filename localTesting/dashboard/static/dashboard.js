@@ -724,3 +724,75 @@ async function loadGeoLocations() {
         console.error('Error loading geo locations:', error);
     }
 }
+
+// ---- Chat Panel ----
+
+(function () {
+    const panel      = document.getElementById('chat-panel');
+    const messages   = document.getElementById('chat-messages');
+    const input      = document.getElementById('chat-input');
+    const sendBtn    = document.getElementById('chat-send-btn');
+    const toggleBtn  = document.getElementById('chat-toggle-btn');
+    const closeBtn   = document.getElementById('chat-close-btn');
+
+    toggleBtn.addEventListener('click', function () {
+        panel.classList.add('open');
+        document.body.classList.add('chat-open');
+        input.focus();
+    });
+
+    closeBtn.addEventListener('click', function () {
+        panel.classList.remove('open');
+        document.body.classList.remove('chat-open');
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function appendMessage(role, text) {
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + role;
+        div.textContent = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+        return div;
+    }
+
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        sendBtn.disabled = true;
+        input.disabled = true;
+
+        appendMessage('user', text);
+        const loadingEl = appendMessage('assistant loading', 'Querying database...');
+
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await res.json();
+            loadingEl.remove();
+
+            if (data.error) {
+                appendMessage('assistant', 'Error: ' + data.error);
+            } else {
+                appendMessage('assistant', data.answer);
+            }
+        } catch (err) {
+            loadingEl.remove();
+            appendMessage('assistant', 'Network error. Please try again.');
+        } finally {
+            sendBtn.disabled = false;
+            input.disabled = false;
+            input.focus();
+        }
+    }
+}());

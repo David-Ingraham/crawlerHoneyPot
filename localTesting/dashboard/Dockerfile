@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY app.py .
+COPY chat_agent.py .
 COPY classifier.py .
 COPY bot_signatures.json .
 COPY templates/ templates/

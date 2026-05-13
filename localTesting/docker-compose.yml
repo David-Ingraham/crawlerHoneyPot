@@ -35,6 +35,8 @@ services:
       - DB_PATH=/data/bot_data.db
       - PORT=8080
       - IPINFO_TOKEN=${IPINFO_TOKEN}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-llama-3.3-70b-versatile}
     depends_on:
       - parser
     networks:

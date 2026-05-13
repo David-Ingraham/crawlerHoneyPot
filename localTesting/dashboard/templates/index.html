@@ -23,6 +23,7 @@
                 <a href="/" class="active">Dashboard</a>
                 <a href="/about">About</a>
                 <a href="/api/download-dataset" class="download-link" download>Download Dataset</a>
+                <button id="chat-toggle-btn" class="chat-toggle-btn">Chat with Data</button>
             </div>
         </div>
     </nav>
@@ -157,6 +158,25 @@
                 <div id="modal-loading" class="modal-loading">Loading requests...</div>
                 <div id="modal-requests" class="request-list"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div id="chat-panel" class="chat-panel" aria-label="Data chat panel">
+        <div class="chat-panel-header">
+            <span>Chat with Data</span>
+            <button id="chat-close-btn" class="chat-close-btn" aria-label="Close chat">&times;</button>
+        </div>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-row">
+            <input
+                type="text"
+                id="chat-input"
+                class="chat-input"
+                placeholder="Ask about the traffic data..."
+                autocomplete="off"
+            >
+            <button id="chat-send-btn" class="chat-send-btn">Send</button>
         </div>
     </div>
 
