@@ -811,6 +811,7 @@ def chat():
         )
         return jsonify({
             'answer': out.get('answer', ''),
+            'chart': out.get('chart'),
             'trace': out.get('trace', []),
         })
 

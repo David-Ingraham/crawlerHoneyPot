@@ -752,11 +752,46 @@ async function loadGeoLocations() {
         if (e.key === 'Enter') sendMessage();
     });
 
-    function appendMessage(role, text) {
+    const chatChartInstances = [];
+
+    function appendMessage(role, text, chartConfig) {
         const div = document.createElement('div');
         div.className = 'chat-msg ' + role;
-        div.textContent = text;
-        messages.appendChild(div);
+
+        if (text) {
+            const textEl = document.createElement('div');
+            textEl.className = 'chat-msg-text';
+            textEl.textContent = text;
+            div.appendChild(textEl);
+        }
+
+        if (chartConfig && typeof Chart !== 'undefined') {
+            const wrap = document.createElement('div');
+            wrap.className = 'chat-chart-wrap';
+            const canvas = document.createElement('canvas');
+            wrap.appendChild(canvas);
+            div.appendChild(wrap);
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+
+            try {
+                const instance = new Chart(canvas.getContext('2d'), chartConfig);
+                chatChartInstances.push(instance);
+            } catch (err) {
+                const errEl = document.createElement('div');
+                errEl.className = 'chat-chart-error';
+                errEl.textContent = 'Chart could not be rendered.';
+                wrap.appendChild(errEl);
+            }
+            return div;
+        }
+
+        if (text) {
+            messages.appendChild(div);
+        } else {
+            div.textContent = text || '';
+            messages.appendChild(div);
+        }
         messages.scrollTop = messages.scrollHeight;
         return div;
     }
@@ -784,7 +819,7 @@ async function loadGeoLocations() {
             if (data.error) {
                 appendMessage('assistant', 'Error: ' + data.error);
             } else {
-                appendMessage('assistant', data.answer);
+                appendMessage('assistant', data.answer, data.chart || null);
             }
         } catch (err) {
             loadingEl.remove();

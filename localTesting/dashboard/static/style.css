@@ -949,6 +949,27 @@ body.chat-open .container {
     font-style: italic;
 }
 
+.chat-msg-text + .chat-chart-wrap {
+    margin-top: 0.75rem;
+}
+
+.chat-chart-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+    max-height: 280px;
+}
+
+.chat-chart-wrap canvas {
+    max-height: 260px;
+}
+
+.chat-chart-error {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
 .chat-input-row {
     display: flex;
     gap: 0.5rem;
